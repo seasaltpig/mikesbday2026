@@ -9,6 +9,9 @@ const audio = document.getElementById('audio');
 const confettiContainer = document.getElementById('confetti-container');
 const ytFrame = document.getElementById('ytFrame');
 
+let confettiInterval = null;
+
+/* View switching */
 function switchView(from, to) {
   from.classList.remove('active');
   setTimeout(() => {
@@ -18,11 +21,11 @@ function switchView(from, to) {
   }, 300);
 }
 
-/* Confetti generator */
-function createConfetti() {
+/* Confetti system */
+function spawnConfettiBatch(count = 20) {
   const colors = ['#00FF00', '#FFFFFF', '#39FF14', '#66FF66'];
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < count; i++) {
     const div = document.createElement('div');
     div.classList.add('confetti');
 
@@ -30,31 +33,56 @@ function createConfetti() {
     div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
     div.style.animationDuration = (Math.random() * 3 + 2) + 's';
 
+    // Optional upgrades: size + slight horizontal drift
+    const size = Math.random() * 6 + 4;
+    div.style.width = size + 'px';
+    div.style.height = size * 1.5 + 'px';
+
+    div.style.transform = `translateX(${Math.random() * 40 - 20}px)`;
+
     confettiContainer.appendChild(div);
 
     setTimeout(() => div.remove(), 5000);
   }
 }
 
-function clearConfetti() {
+function startConfetti() {
+  if (confettiInterval) return;
+
+  // initial burst
+  spawnConfettiBatch(40);
+
+  // continuous flow
+  confettiInterval = setInterval(() => {
+    spawnConfettiBatch(15);
+  }, 400);
+}
+
+function stopConfetti() {
+  clearInterval(confettiInterval);
+  confettiInterval = null;
   confettiContainer.innerHTML = '';
 }
 
 /* Start button */
-startBtn.addEventListener('click', () => {
-  audio.currentTime = 0;
-  audio.play();
+startBtn.addEventListener('click', async () => {
+  try {
+    audio.currentTime = 0;
+    await audio.play();
+  } catch (err) {
+    console.error("Audio failed:", err);
+  }
 
-  createConfetti();
+  startConfetti();
   switchView(view1, view2);
 });
 
-/* Skip or audio end */
+/* Transition to video */
 function goToVideo() {
   audio.pause();
-  clearConfetti();
+  stopConfetti();
 
-  ytFrame.src = "https://www.youtube.com/embed/fSwLvSLV3ZE?autoplay=1&playsinline=1";
+  ytFrame.src = "https://www.youtube.com/embed/fSwLvSLV3ZE?autoplay=1&mute=1&playsinline=1";
   switchView(view2, view3);
 }
 
