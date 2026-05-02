@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mike's Birthday</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            neon: '#00FF00'
+          },
+          fontFamily: {
+            display: ['Anton', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-black text-white font-body overflow-hidden">
+
+  <!-- View 1 -->
+  <section id="view1" class="view active flex flex-col items-center justify-center h-screen text-center">
+    <p class="font-mono text-sm mb-6">A Birthday Gift for Mike</p>
+    <h1 class="font-display text-6xl md:text-8xl mb-10">Press Play To Begin</h1>
+
+    <button id="startBtn" class="neon-btn flex items-center gap-3 px-10 py-5 text-xl">
+      <i data-lucide="play"></i>
+      Click Me!
+    </button>
+  </section>
+
+  <!-- View 2 -->
+  <section id="view2" class="view hidden flex flex-col items-center justify-center h-screen text-center relative">
+    
+    <div class="bounce mb-6">
+      <i data-lucide="music" class="w-10 h-10 text-neon"></i>
+    </div>
+
+    <div class="leading-none">
+      <h1 class="font-display text-6xl md:text-8xl italic text-neon">HAPPY</h1>
+      <h1 class="font-display text-6xl md:text-8xl italic text-neon">BIRTHDAY</h1>
+      <h1 class="font-display text-7xl md:text-9xl">MIKE</h1>
+    </div>
+
+    <p class="absolute bottom-6 text-sm opacity-60">Let the party roll... (Click to skip)</p>
+
+    <div id="confetti-container"></div>
+  </section>
+
+  <!-- View 3 -->
+  <section id="view3" class="view hidden flex flex-col items-center justify-center h-screen text-center px-4">
+    
+    <div class="flex items-center gap-2 mb-6">
+      <i data-lucide="youtube" class="text-neon"></i>
+      <span class="font-mono">The Celebration!</span>
+    </div>
+
+    <div class="video-wrapper mb-6">
+      <iframe id="ytFrame"
+        src=""
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <p class="mb-6 text-lg">Hope your 2026 birthday is the best one yet!</p>
+
+    <button id="restartBtn" class="underline opacity-60 hover:opacity-100">
+      Restart Party
+    </button>
+  </section>
+
+  <audio id="audio" src="song.mp3"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
