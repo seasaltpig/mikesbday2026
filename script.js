@@ -54,7 +54,7 @@ function goToVideo() {
   audio.pause();
   clearConfetti();
 
-  ytFrame.src = "https://www.youtube.com/embed/fSwLvSLV3ZE?autoplay=1&mute=1&playsinline=1";
+  ytFrame.src = "https://www.youtube.com/embed/fSwLvSLV3ZE?autoplay=1&playsinline=1";
   switchView(view2, view3);
 }
 
