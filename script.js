@@ -9,7 +9,8 @@ const audio = document.getElementById('audio');
 const confettiContainer = document.getElementById('confetti-container');
 const ytFrame = document.getElementById('ytFrame');
 
-let confettiInterval = null;
+let audioCtx, analyser, source, dataArray;
+let confettiRunning = false;
 
 /* View switching */
 function switchView(from, to) {
@@ -21,8 +22,23 @@ function switchView(from, to) {
   }, 300);
 }
 
-/* Confetti system */
-function spawnConfettiBatch(count = 20) {
+/* AUDIO SETUP */
+function setupAudioAnalysis() {
+  if (audioCtx) return;
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+
+  source = audioCtx.createMediaElementSource(audio);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
+}
+
+/* CONFETTI */
+function spawnConfetti(count = 10) {
   const colors = ['#00FF00', '#FFFFFF', '#39FF14', '#66FF66'];
 
   for (let i = 0; i < count; i++) {
@@ -31,14 +47,12 @@ function spawnConfettiBatch(count = 20) {
 
     div.style.left = Math.random() * 100 + 'vw';
     div.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    div.style.animationDuration = (Math.random() * 3 + 2) + 's';
 
-    // Optional upgrades: size + slight horizontal drift
     const size = Math.random() * 6 + 4;
     div.style.width = size + 'px';
     div.style.height = size * 1.5 + 'px';
 
-    div.style.transform = `translateX(${Math.random() * 40 - 20}px)`;
+    div.style.animationDuration = (Math.random() * 2 + 2) + 's';
 
     confettiContainer.appendChild(div);
 
@@ -46,38 +60,59 @@ function spawnConfettiBatch(count = 20) {
   }
 }
 
-function startConfetti() {
-  if (confettiInterval) return;
+/* AUDIO REACTIVE LOOP */
+function startReactiveConfetti() {
+  if (confettiRunning) return;
+  confettiRunning = true;
 
-  // initial burst
-  spawnConfettiBatch(40);
+  function loop() {
+    if (!confettiRunning) return;
 
-  // continuous flow
-  confettiInterval = setInterval(() => {
-    spawnConfettiBatch(15);
-  }, 400);
+    analyser.getByteFrequencyData(dataArray);
+
+    // Get average volume
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      sum += dataArray[i];
+    }
+    let avg = sum / dataArray.length;
+
+    // Map volume → confetti amount
+    let intensity = Math.floor(avg / 10); // tweak sensitivity here
+
+    spawnConfetti(intensity);
+
+    requestAnimationFrame(loop);
+  }
+
+  loop();
 }
 
 function stopConfetti() {
-  clearInterval(confettiInterval);
-  confettiInterval = null;
+  confettiRunning = false;
   confettiContainer.innerHTML = '';
 }
 
-/* Start button */
+/* START */
 startBtn.addEventListener('click', async () => {
   try {
+    setupAudioAnalysis();
+
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+
     audio.currentTime = 0;
     await audio.play();
   } catch (err) {
     console.error("Audio failed:", err);
   }
 
-  startConfetti();
+  startReactiveConfetti();
   switchView(view1, view2);
 });
 
-/* Transition to video */
+/* GO TO VIDEO */
 function goToVideo() {
   audio.pause();
   stopConfetti();
@@ -89,11 +124,11 @@ function goToVideo() {
 view2.addEventListener('click', goToVideo);
 audio.addEventListener('ended', goToVideo);
 
-/* Restart */
+/* RESTART */
 restartBtn.addEventListener('click', () => {
   ytFrame.src = "";
   switchView(view3, view1);
 });
 
-/* Init icons */
+/* INIT ICONS */
 lucide.createIcons();
